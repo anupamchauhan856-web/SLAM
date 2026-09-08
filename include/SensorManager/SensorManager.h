@@ -3,8 +3,10 @@
 #include<unordered_map>
 #include<string>
 #include<memory>
+#include<vector>
 
 #include"SensorContext.h"
+#include"BufferManager.h"
 
 class SensorManager{
 public:
@@ -19,4 +21,12 @@ public:
 private:
     //STORE ALL SENSORS AVAILABLE
     std::unordered_map<std::string,std::shared_ptr<SensorContext>> sensors_;
+
+    //LOOKUP FOR SENSOR BY NAME
+    std::vector<std::string> cameras_;
+    std::vector<std::string> imus_;
+    std::vector<std::string> lidars_;
+
+    //BUFFER MANAGER: HOLDS ALL SENSOR DATA
+    BufferManager buffer_manager_;
 };

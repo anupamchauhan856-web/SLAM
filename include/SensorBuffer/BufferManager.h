@@ -11,6 +11,8 @@
 #include <mutex>
 #include <memory>
 #include <variant>
+#include <deque>
+#include <unordered_map>
 
 #include"CameraData.h"
 #include"ImuData.h"
@@ -19,6 +21,10 @@ class BufferManager{
 public:
     //DATA SHOULD BE ABLE TO HOLD OBJECTS OF MORE THAN ONE TYPES
     using Data=std::variant<CameraData,ImuData>;
+
+    // CREATE A QUEUE FOR A SENSOR BASED ON ID
+    //CALLED BY ADD SENSOR IN SENSOR MANAGER
+    bool registerSensor(const std::string& sensor_id);
 
     //CHRONOLOGICAL PUBLISHING OF SENSOR DATA
     bool push(Data data);
@@ -31,5 +37,5 @@ public:
 private:
     //PREVENT RACE CONDITION OF BUFFER WRITE AND READ
     mutable std::mutex mutex_;
-    std::multimap<int64_t, Data> buffer_;
+    std::unordered_map<std::string,std::deque<Data>> buffers_;
 };

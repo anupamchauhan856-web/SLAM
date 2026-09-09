@@ -2,6 +2,10 @@
 
 Modular Visual, Visual-Inertial and Stereo SLAM framework in C++.
 
+## System Specification
+
+- **Current visualizer:** Pangolin
+
 ## Status
 
 - ⚪ Not Started
@@ -13,10 +17,6 @@ Modular Visual, Visual-Inertial and Stereo SLAM framework in C++.
 - 🟡 Monocular SLAM
 - ⚪ Visual-Inertial SLAM
 - ⚪ Stereo SLAM
-
-## System Specification
-
-- **Current visualizer:** Pangolin
 
 ## Visual Frontend
 

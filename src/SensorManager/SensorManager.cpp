@@ -63,17 +63,15 @@ bool SensorManager::loadConfig(const std::string& config_path)
 {
     try
     {
+        //CHECK IF CONFIG MISSING
         YAML::Node config = YAML::LoadFile(config_path);
-
-        // Dataset configuration
         if (!config["dataset"])
         {
             std::cerr << "Error: dataset configuration missing\n";
             return false;
         }
 
-        const std::string dataset_path =
-            config["dataset"]["path"].as<std::string>();
+        const std::string dataset_path = config["dataset"]["path"].as<std::string>();
 
         // Sensor configuration
         if (!config["sensors"] || !config["sensors"].IsSequence())

@@ -1,0 +1,61 @@
+system:
+  mode: monocular
+  visualizer: pangolin
+
+data_sources:
+  type: dataset
+  dataset:
+    name: euroc
+    path: "dataset/euroc"
+
+  playback:
+    realtime: true
+    rate: 1.0
+
+sensors:
+ - id: cam0
+    type: camera
+    source: dataset
+    driver: euroc
+
+    config:
+      stream: cam0
+      data_path: "mav0/cam0/data"
+      csv: "mav0/cam0/data.csv"
+
+      calibration:
+        type: loader
+        name: euroc_yaml
+        file: "mav0/cam0/sensor.yaml"
+
+
+  - id: cam1
+    type: camera
+    source: dataset
+    driver: euroc
+
+    config:
+      stream: cam1
+      data_path: "mav0/cam1/data"
+      csv: "mav0/cam1/data.csv"
+
+      calibration:
+        type: loader
+        name: euroc_yaml
+        file: "mav0/cam1/sensor.yaml"
+
+
+  - id: imu0
+    type: imu
+    source: dataset
+    driver: euroc
+
+    config:
+      stream: imu0
+      csv: "mav0/imu0/data.csv"
+
+      calibration:
+        type: loader
+        name: euroc_yaml
+        file: "mav0/imu0/sensor.yaml"
+ 

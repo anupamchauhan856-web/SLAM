@@ -9,6 +9,7 @@
 
 #include"SensorContext.h"
 #include"SensorBuffer/BufferManager.h"
+#include"SensorDrivers/EurocDatasetDriver.h"
 
 class SensorManager{
 public:
@@ -23,6 +24,11 @@ public:
     bool stop();
 
     std::shared_ptr<SensorContext> getSensor(const std::string& name);
+
+    // SENSOR DATA TYPE PROVIDED BY BUFFER MANAGER: CALL POP NEXT
+    using Data = BufferManager::Data;
+    bool popNext(Data& data);
+
 private:
     //STORE ALL SENSORS AVAILABLE
     std::unordered_map<std::string,std::shared_ptr<SensorContext>> sensors_;

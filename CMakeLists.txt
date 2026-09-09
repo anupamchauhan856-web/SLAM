@@ -26,6 +26,7 @@ add_executable(slam_app
     src/SensorManager/SensorManager.cpp
     src/SensorManager/SensorContext.cpp
     src/BufferManager/BufferManager.cpp
+    src/SensorDrivers/EurocDatasetDriver.cpp
 )
 
 target_include_directories(slam_app PRIVATE

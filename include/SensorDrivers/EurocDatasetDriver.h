@@ -4,9 +4,10 @@
 #include <opencv2/imgcodecs.hpp>
 
 #include "SensorDriver.h"
-#include"BufferManager.h"
-#include"CameraEntry.h"
-#include"ImuEntry.h"
+#include"SensorBuffer/BufferManager.h"
+
+#include"SensorDriverDataStructs/CameraEntry.h"
+#include"SensorDriverDataStructs/ImuEntry.h"
 
 class EurocDatasetDriver : public SensorDriver{
 public:
@@ -17,6 +18,11 @@ public:
     //BUFFER MUST BE INIT BEFORE DRIVER IS CREATED
     EurocDatasetDriver(
         const std::string& dataset_path,
+        const std::string& sensor_id,
+        const std::string& sensor_type,
+        const std::string& stream,
+        const std::string& data_path,
+        const std::string& csv,
         BufferManager& buffer_manager
     );
 
@@ -55,5 +61,12 @@ public:
 
 private:
     std::string dataset_path_;
+
+    std::string sensor_id_;
+    std::string sensor_type_;
+    std::string stream_;
+    std::string data_path_;
+    std::string csv_;
+
     BufferManager& buffer_manager_;
 };

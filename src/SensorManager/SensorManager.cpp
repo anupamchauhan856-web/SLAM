@@ -65,44 +65,90 @@ bool SensorManager::loadConfig(const std::string& config_path)
     {
         YAML::Node config = YAML::LoadFile(config_path);
 
-        // Check that sensors section exists
-        if (!config["sensors"] || !config["sensors"].IsSequence())
+        // Dataset configuration
+        if (!config["dataset"])
         {
-            std::cerr << "Error: 'sensors' section is missing "
-                         "or is not a sequence\n";
+            std::cerr << "Error: dataset configuration missing\n";
             return false;
         }
 
-        // Read every sensor from YAML
+        const std::string dataset_path =
+            config["dataset"]["path"].as<std::string>();
+
+        // Sensor configuration
+        if (!config["sensors"] || !config["sensors"].IsSequence())
+        {
+            std::cerr << "Error: sensors configuration missing\n";
+            return false;
+        }
+
         for (const auto& sensor_node : config["sensors"])
         {
-            // Required fields
-            if (!sensor_node["id"] ||
-                !sensor_node["type"] ||
-                !sensor_node["source"] ||
-                !sensor_node["driver"])
-            {
-                std::cerr << "Error: sensor is missing required fields\n";
-                return false;
-            }
+            const std::string id =
+                sensor_node["id"].as<std::string>();
 
-            const std::string id     = sensor_node["id"].as<std::string>();
-            const std::string type   = sensor_node["type"].as<std::string>();
-            const std::string source = sensor_node["source"].as<std::string>();
-            const std::string driver = sensor_node["driver"].as<std::string>();
+            const std::string type =
+                sensor_node["type"].as<std::string>();
 
-            // Check for duplicate sensor IDs
-            if (sensors_.find(id) != sensors_.end())
+            const std::string source =
+                sensor_node["source"].as<std::string>();
+
+            const std::string driver =
+                sensor_node["driver"].as<std::string>();
+
+            // Currently support EuRoC dataset sensors only
+            if (source != "dataset" || driver != "euroc")
             {
-                std::cerr << "Error: duplicate sensor id: "
+                std::cerr << "Unsupported source/driver for sensor: "
                           << id << '\n';
                 return false;
             }
 
-            // --------------------------------------------------
-            // Store sensor type
-            // --------------------------------------------------
+            const YAML::Node sensor_config =
+                sensor_node["config"];
 
+            const std::string stream =
+                sensor_config["stream"].as<std::string>();
+
+            const std::string csv =
+                sensor_config["csv"].as<std::string>();
+
+            std::string data_path;
+
+            if (sensor_config["data_path"])
+            {
+                data_path =
+                    sensor_config["data_path"].as<std::string>();
+            }
+
+            // Create the EuRoC driver
+            auto driver_object =
+                std::make_unique<EurocDatasetDriver>(
+                    dataset_path,
+                    id,
+                    type,
+                    stream,
+                    data_path,
+                    csv,
+                    buffer_manager_);
+
+            // Create the common SensorContext
+            auto sensor =
+                std::make_unique<SensorContext>(
+                    id,
+                    std::move(driver_object));
+
+            // addSensor() registers both:
+            // 1. SensorContext in sensors_
+            // 2. Buffer in BufferManager
+            if (!addSensor(std::move(sensor)))
+            {
+                std::cerr << "Failed to add sensor: "
+                          << id << '\n';
+                return false;
+            }
+
+            // Keep track of sensor type
             if (type == "camera")
             {
                 cameras_.push_back(id);
@@ -117,57 +163,16 @@ bool SensorManager::loadConfig(const std::string& config_path)
             }
             else
             {
-                std::cerr << "Error: unsupported sensor type '"
-                          << type << "' for sensor "
-                          << id << '\n';
+                std::cerr << "Unsupported sensor type: "
+                          << type << '\n';
                 return false;
             }
 
-            // --------------------------------------------------
-            // Validate source and driver
-            // --------------------------------------------------
-
-            if (source != "dataset")
-            {
-                std::cerr << "Error: unsupported source '"
-                          << source << "' for sensor "
-                          << id << '\n';
-                return false;
-            }
-
-            if (driver != "euroc")
-            {
-                std::cerr << "Error: unsupported driver '"
-                          << driver << "' for sensor "
-                          << id << '\n';
-                return false;
-            }
-
-            // --------------------------------------------------
-            // Register buffer for this sensor
-            // --------------------------------------------------
-
-            if (!buffer_manager_.registerSensor(id))
-            {
-                std::cerr << "Error: failed to register buffer for "
-                          << "sensor " << id << '\n';
-                return false;
-            }
-
-            std::cout << "Registered sensor: "
-                      << id
-                      << " (" << type << ")\n";
+            std::cout << "Added sensor: "
+                      << id << " (" << type << ")\n";
         }
 
         return true;
-    }
-    catch (const YAML::BadFile& e)
-    {
-        std::cerr << "Error: could not open config file '"
-                  << config_path << "': "
-                  << e.what() << '\n';
-
-        return false;
     }
     catch (const YAML::Exception& e)
     {
@@ -176,4 +181,9 @@ bool SensorManager::loadConfig(const std::string& config_path)
 
         return false;
     }
+}
+
+bool SensorManager::popNext(Data& data)
+{
+    return buffer_manager_.popNext(data);
 }

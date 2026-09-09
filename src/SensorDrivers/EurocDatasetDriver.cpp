@@ -1,4 +1,4 @@
-#include "EurocDatasetDriver.h"
+#include "SensorDrivers/EurocDatasetDriver.h"
 
 #include <fstream>
 #include <sstream>
@@ -7,8 +7,18 @@
 
 EurocDatasetDriver::EurocDatasetDriver(
     const std::string& dataset_path,
+    const std::string& sensor_id,
+    const std::string& sensor_type,
+    const std::string& stream,
+    const std::string& data_path,
+    const std::string& csv,
     BufferManager& buffer_manager)
     : dataset_path_(dataset_path),
+      sensor_id_(sensor_id),
+      sensor_type_(sensor_type),
+      stream_(stream),
+      data_path_(data_path),
+      csv_(csv),
       buffer_manager_(buffer_manager)
 {
 }
@@ -127,26 +137,14 @@ bool EurocDatasetDriver::loadCameraFrame(
     const std::string& camera_path,
     uint32_t camera_id)
 {
-    std::string imagePath =
-        camera_path + "/" + entry.filename;
-
-    cv::Mat image =
-        cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
-
-    if (image.empty())
-        return false;
-
+    std::string imagePath =camera_path + "/" + entry.filename;
+    std::cout << "Loading image: " << imagePath << std::endl;
+    cv::Mat image =cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
+    if (image.empty()) return false;
     CameraData data;
-
-    data.sensor_id =
-        "cam" + std::to_string(camera_id);
-
-    data.timestamp =
-        entry.timestamp;
-
-    data.image =
-        image;
-
+    data.sensor_id ="cam" + std::to_string(camera_id);
+    data.timestamp =entry.timestamp;
+    data.image =image;
     return buffer_manager_.push(std::move(data));
 }
 
@@ -180,6 +178,53 @@ bool EurocDatasetDriver::init()
 
 bool EurocDatasetDriver::start()
 {
+    const std::string csv_path =
+        dataset_path_ + "/" + csv_;
+
+    if (sensor_type_ == "camera")
+    {
+        std::vector<CameraEntry> entries;
+
+        if (!loadCameraCsv(csv_path, entries))
+            return false;
+
+        uint32_t camera_id = 0;
+
+        if (sensor_id_ == "cam1")
+            camera_id = 1;
+
+        const std::string camera_path =
+            dataset_path_ + "/" + data_path_;
+
+        for (const auto& entry : entries)
+        {
+            if (!loadCameraFrame(
+                    entry,
+                    camera_path,
+                    camera_id))
+            {
+                return false;
+            }
+        }
+    }
+    else if (sensor_type_ == "imu")
+    {
+        std::vector<ImuEntry> entries;
+
+        if (!loadImuCsv(csv_path, entries))
+            return false;
+
+        for (const auto& entry : entries)
+        {
+            if (!publishImu(entry))
+                return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+
     return true;
 }
 

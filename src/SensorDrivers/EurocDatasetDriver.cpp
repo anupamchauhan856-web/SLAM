@@ -5,6 +5,7 @@
 #include <iostream>
 #include <filesystem>
 
+//CONSTRUCTOR
 EurocDatasetDriver::EurocDatasetDriver(
     const std::string& dataset_path,
     const std::string& sensor_id,
@@ -56,6 +57,10 @@ bool EurocDatasetDriver::loadCameraCsv(
         CameraEntry entry;
 
         entry.timestamp = std::stoll(timestamp);
+
+        if (!filename.empty() && filename.back() == '\r')
+            filename.pop_back();
+
         entry.filename = filename;
 
         entries.push_back(entry);
@@ -138,7 +143,6 @@ bool EurocDatasetDriver::loadCameraFrame(
     uint32_t camera_id)
 {
     std::string imagePath =camera_path + "/" + entry.filename;
-    std::cout << "Loading image: " << imagePath << std::endl;
     cv::Mat image =cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
     if (image.empty()) return false;
     CameraData data;
@@ -152,83 +156,103 @@ bool EurocDatasetDriver::publishImu(
     const ImuEntry& entry)
 {
     ImuData data;
-
     data.sensor_id = "imu0";
-
     data.timestamp = entry.timestamp;
-
     data.gyro_x = entry.gyro_x;
     data.gyro_y = entry.gyro_y;
     data.gyro_z = entry.gyro_z;
-
     data.accel_x = entry.accel_x;
     data.accel_y = entry.accel_y;
     data.accel_z = entry.accel_z;
-
     return buffer_manager_.push(std::move(data));
 }
 
 bool EurocDatasetDriver::init()
 {
-    if (!std::filesystem::exists(dataset_path_))
-        return false;
-
+    if (!std::filesystem::exists(dataset_path_)) return false;
     return true;
 }
 
 bool EurocDatasetDriver::start()
 {
-    const std::string csv_path =
-        dataset_path_ + "/" + csv_;
-
-    if (sensor_type_ == "camera")
-    {
-        std::vector<CameraEntry> entries;
-
-        if (!loadCameraCsv(csv_path, entries))
-            return false;
-
-        uint32_t camera_id = 0;
-
-        if (sensor_id_ == "cam1")
-            camera_id = 1;
-
-        const std::string camera_path =
-            dataset_path_ + "/" + data_path_;
-
-        for (const auto& entry : entries)
-        {
-            if (!loadCameraFrame(
-                    entry,
-                    camera_path,
-                    camera_id))
-            {
-                return false;
-            }
-        }
-    }
-    else if (sensor_type_ == "imu")
-    {
-        std::vector<ImuEntry> entries;
-
-        if (!loadImuCsv(csv_path, entries))
-            return false;
-
-        for (const auto& entry : entries)
-        {
-            if (!publishImu(entry))
-                return false;
-        }
-    }
-    else
-    {
+    if (running_)
         return false;
-    }
+
+    running_ = true;
+
+    playback_thread_ = std::thread(
+        [this]()
+        {
+            const std::string csv_path = dataset_path_ + "/" + csv_;
+
+            if (sensor_type_ == "camera")
+            {
+                std::vector<CameraEntry> entries;
+
+                if (!loadCameraCsv(csv_path, entries))
+                {
+                    running_ = false;
+                    return;
+                }
+
+                uint32_t camera_id = 0;
+                if (sensor_id_ == "cam1")
+                    camera_id = 1;
+
+                const std::string camera_path =
+                    dataset_path_ + "/" + data_path_;
+
+                for (const auto& entry : entries)
+                {
+                    if (!running_)
+                        break;
+
+                    if (!loadCameraFrame(
+                            entry,
+                            camera_path,
+                            camera_id))
+                    {
+                        break;
+                    }
+                }
+            }
+            else if (sensor_type_ == "imu")
+            {
+                std::vector<ImuEntry> entries;
+
+                if (!loadImuCsv(csv_path, entries))
+                {
+                    running_ = false;
+                    return;
+                }
+
+                for (const auto& entry : entries)
+                {
+                    if (!running_)
+                        break;
+
+                    if (!publishImu(entry))
+                        break;
+                }
+            }
+
+            running_ = false;
+        });
 
     return true;
 }
 
 bool EurocDatasetDriver::stop()
 {
+    running_ = false;
+
+    if (playback_thread_.joinable())
+        playback_thread_.join();
+
     return true;
+}
+
+bool EurocDatasetDriver::isRunning() const
+{
+    return running_;
 }

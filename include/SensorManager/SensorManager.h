@@ -29,6 +29,8 @@ public:
     using Data = BufferManager::Data;
     bool popNext(Data& data);
 
+    bool isRunning() const;
+
 private:
     //STORE ALL SENSORS AVAILABLE
     std::unordered_map<std::string,std::shared_ptr<SensorContext>> sensors_;

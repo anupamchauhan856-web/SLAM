@@ -187,3 +187,14 @@ bool SensorManager::popNext(Data& data)
 {
     return buffer_manager_.popNext(data);
 }
+
+bool SensorManager::isRunning() const
+{
+    for (const auto& [name, sensor] : sensors_)
+    {
+        if (sensor->getDriver().isRunning())
+            return true;
+    }
+
+    return false;
+}

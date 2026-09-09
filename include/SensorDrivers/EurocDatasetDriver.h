@@ -1,5 +1,8 @@
 #pragma once
 
+#include <thread>
+#include <atomic>
+
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 
@@ -59,6 +62,8 @@ public:
         const ImuEntry& entry
     );
 
+    bool isRunning() const;
+
 private:
     std::string dataset_path_;
 
@@ -69,4 +74,8 @@ private:
     std::string csv_;
 
     BufferManager& buffer_manager_;
+
+    //HANDLING PUSH AND POP OF DATA
+    std::thread playback_thread_;
+    std::atomic<bool> running_{false};
 };

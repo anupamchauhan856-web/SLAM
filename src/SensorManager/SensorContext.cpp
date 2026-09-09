@@ -23,3 +23,9 @@ const std::string& SensorContext::getName() const
 {
     return name_;
 }
+
+SensorDriver& SensorContext::getDriver()
+{
+    return *driver_;
+}
+

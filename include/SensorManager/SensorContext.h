@@ -21,6 +21,7 @@ public:
     bool stop();
 
     const std::string& getName() const;
+    SensorDriver& getDriver();
 
     void setCameraCalibration(
         const std::string& sensorId,

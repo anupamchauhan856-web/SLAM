@@ -11,6 +11,13 @@ bool BufferManager::registerSensor(const std::string& sensor_id)
 bool BufferManager::push(Data data)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+
+    // std::cout << "PUSH: "
+    //           << getSensorId(data)
+    //           << " | "
+    //           << getTimestamp(data)
+    //           << std::endl;
+
     std::string sensor_id = getSensorId(data);
     auto it = buffers_.find(sensor_id);
     if (it == buffers_.end()) return false;

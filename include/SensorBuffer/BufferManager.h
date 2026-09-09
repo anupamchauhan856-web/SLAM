@@ -13,6 +13,7 @@
 #include <variant>
 #include <deque>
 #include <unordered_map>
+#include<iostream>
 
 #include"SensorDataClasses/CameraData.h"
 #include"SensorDataClasses/ImuData.h"

@@ -2,6 +2,12 @@
 
 Modular Visual, Visual-Inertial and Stereo SLAM framework in C++.
 
+## Status
+
+- ⚪ Not Started
+- 🟡 In Progress
+- 🟢 Completed
+
 ## Target Systems
 
 - 🟡 Monocular SLAM

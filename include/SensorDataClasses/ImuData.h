@@ -5,7 +5,7 @@
 class ImuData
 {
 public:
-    uint32_t id = 0;
+    std::string sensor_id;
     int64_t timestamp = 0;
 
     double accel_x = 0.0;

@@ -2,14 +2,14 @@
 
 #include<cstdint>
 
-class ImuEntry{
-    int64_t timestamp;
+struct ImuEntry{
+    int64_t timestamp=0;
 
-    double gyro_x;
-    double gyro_y;
-    double gyro_z;
+    double gyro_x=0.0;
+    double gyro_y=0.0;
+    double gyro_z=0.0;
 
-    double accel_x;
-    double accel_y;
-    double accel_z;
+    double accel_x=0.0;
+    double accel_y=0.0;
+    double accel_z=0.0;
 };

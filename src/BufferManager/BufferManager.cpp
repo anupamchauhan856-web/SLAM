@@ -1,4 +1,4 @@
-#include"BufferManager.h"
+#include"SensorBuffer/BufferManager.h"
 
 bool BufferManager::registerSensor(const std::string& sensor_id)
 {
@@ -11,8 +11,7 @@ bool BufferManager::registerSensor(const std::string& sensor_id)
 bool BufferManager::push(Data data)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    std::string sensor_id;
-    std::visit([&](const auto& value){sensor_id = value.id;},data);
+    std::string sensor_id = getSensorId(data);
     auto it = buffers_.find(sensor_id);
     if (it == buffers_.end()) return false;
     it->second.push_back(std::move(data));
@@ -69,4 +68,24 @@ std::size_t BufferManager::size() const
         total += buffer.size();
     }
     return total;
+}
+
+std::string BufferManager::getSensorId(const Data& data)
+{
+    return std::visit(
+        [](const auto& sensorData)
+        {
+            return sensorData.sensor_id;
+        },
+        data);
+}
+
+int64_t BufferManager::getTimestamp(const Data& data)
+{
+    return std::visit(
+        [](const auto& sensorData)
+        {
+            return sensorData.timestamp;
+        },
+        data);
 }

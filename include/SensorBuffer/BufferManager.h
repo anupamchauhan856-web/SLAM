@@ -14,8 +14,8 @@
 #include <deque>
 #include <unordered_map>
 
-#include"CameraData.h"
-#include"ImuData.h"
+#include"SensorDataClasses/CameraData.h"
+#include"SensorDataClasses/ImuData.h"
 
 class BufferManager{
 public:
@@ -38,4 +38,8 @@ private:
     //PREVENT RACE CONDITION OF BUFFER WRITE AND READ
     mutable std::mutex mutex_;
     std::unordered_map<std::string,std::deque<Data>> buffers_;
+
+    //FUNCTIONS
+    static std::string getSensorId(const Data& data);
+    static int64_t getTimestamp(const Data& data);
 };

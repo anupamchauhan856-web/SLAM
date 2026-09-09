@@ -4,10 +4,10 @@ project(slam_core LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(OpenCV REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 add_library(slam_core INTERFACE)
 
@@ -18,4 +18,21 @@ target_include_directories(slam_core INTERFACE
 
 target_link_libraries(slam_core INTERFACE
     ${OpenCV_LIBS}
+)
+
+# Application
+add_executable(slam_app
+    src/main.cpp
+    src/SensorManager/SensorManager.cpp
+    src/SensorManager/SensorContext.cpp
+    src/BufferManager/BufferManager.cpp
+)
+
+target_include_directories(slam_app PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(slam_app PRIVATE
+    slam_core
+    yaml-cpp
 )

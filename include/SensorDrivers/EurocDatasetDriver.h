@@ -1,5 +1,8 @@
 #pragma once
 
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgcodecs.hpp>
+
 #include "SensorDriver.h"
 #include"BufferManager.h"
 #include"CameraEntry.h"
@@ -10,6 +13,8 @@ public:
     //CONSTRUCTOR
     //PATH OF DATASET
     //BUFFER WHERE IT WILL BE SAVED: OWN BUFFER
+    //REFERENCE OF BUFFER MANAGER IS TAKEN IN CONSTRUCTOR
+    //BUFFER MUST BE INIT BEFORE DRIVER IS CREATED
     EurocDatasetDriver(
         const std::string& dataset_path,
         BufferManager& buffer_manager
@@ -49,6 +54,6 @@ public:
     );
 
 private:
-
-
+    std::string dataset_path_;
+    BufferManager& buffer_manager_;
 };

@@ -1,4 +1,4 @@
-#include "SensorContext.h"
+#include "SensorManager/SensorContext.h"
 
 SensorContext::SensorContext(const std::string& name,
     std::unique_ptr<SensorDriver> driver):name_(name),

@@ -4,12 +4,17 @@
 #include<string>
 #include<memory>
 #include<vector>
+#include<iostream>
+#include <yaml-cpp/yaml.h>
 
 #include"SensorContext.h"
-#include"BufferManager.h"
+#include"SensorBuffer/BufferManager.h"
 
 class SensorManager{
 public:
+    //LOAD CONFIGURATION FILE AND CREATE SENSOR CONTEXTS
+    bool loadConfig(const std::string& config_path);
+
     //ADD A SENSOR TO THE MANAGER TO THE CURRENT TYPE OF SLAM SYSTEM
     bool addSensor(std::unique_ptr<SensorContext> sensor);
 

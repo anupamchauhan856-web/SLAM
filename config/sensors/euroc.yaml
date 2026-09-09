@@ -28,7 +28,8 @@ sensors:
       csv: "mav0/cam0/data.csv"
 
       calibration:
-        loader: euroc_yaml_calibration
+        type: loader
+        name: euroc_yaml
         file: "mav0/cam0/sensor.yaml"
 
 
@@ -43,7 +44,8 @@ sensors:
       csv: "mav0/cam1/data.csv"
 
       calibration:
-        loader: euroc_yaml_calibration
+        type: loader
+        name: euroc_yaml
         file: "mav0/cam1/sensor.yaml"
 
 
@@ -57,5 +59,6 @@ sensors:
       csv: "mav0/imu0/data.csv"
 
       calibration:
-        loader: euroc_yaml_calibration
+        type: loader
+        name: euroc_yaml
         file: "mav0/imu0/sensor.yaml"

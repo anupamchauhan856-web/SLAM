@@ -7,7 +7,7 @@
 #include <opencv2/imgcodecs.hpp>
 
 #include "SensorDriver.h"
-#include"SensorBuffer/BufferManager.h"
+#include"Sensors/Buffers/BufferManager.h"
 
 #include"SensorDriverDataStructs/CameraEntry.h"
 #include"SensorDriverDataStructs/ImuEntry.h"

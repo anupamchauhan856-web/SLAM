@@ -106,32 +106,20 @@ bool BufferManager::push(Data data)
 // BLOCKING PUSH
 // ============================================================
 
-bool BufferManager::pushBlocking(
-    Data data,
-    const std::atomic<bool>& running)
+bool BufferManager::pushBlocking(Data data,const std::atomic<bool>& running)
 {
     std::unique_lock<std::mutex> lock(mutex_);
-
-    const std::string sensor_id =
-        getSensorId(data);
-
+    const std::string sensor_id = getSensorId(data);
     auto it = buffers_.find(sensor_id);
-
-    if (it == buffers_.end())
-        return false;
-
-    SensorBuffer& sensor_buffer =
-        it->second;
-
-    const std::int64_t timestamp =
-        getTimestamp(data);
+    if (it == buffers_.end()) return false;
+    SensorBuffer& sensor_buffer = it->second;
+    const std::int64_t timestamp = getTimestamp(data);
 
     // --------------------------------------------------------
     // Per-sensor timestamp monotonicity
     // --------------------------------------------------------
 
-    if (sensor_buffer.has_received_data &&
-        timestamp < sensor_buffer.last_timestamp)
+    if (sensor_buffer.has_received_data && timestamp < sensor_buffer.last_timestamp)
     {
         return false;
     }
@@ -141,39 +129,24 @@ bool BufferManager::pushBlocking(
     // or the producer is being stopped.
     // --------------------------------------------------------
 
-    cv_not_full_.wait(
-        lock,
-        [&]()
+    cv_not_full_.wait(lock,[&]()
         {
-            return
-                sensor_buffer.data.size()
-                    < sensor_buffer.max_size
+            return sensor_buffer.data.size() < sensor_buffer.max_size
                 || !running.load();
         });
 
-    if (!running.load())
-        return false;
+    if (!running.load()) return false;
 
     // --------------------------------------------------------
     // Insert measurement
     // --------------------------------------------------------
 
-    sensor_buffer.data.push_back(
-        std::move(data));
-
-    sensor_buffer.last_timestamp =
-        timestamp;
-
-    sensor_buffer.has_received_data =
-        true;
-
-    sensor_buffer.last_received_time =
-        Clock::now();
-
+    sensor_buffer.data.push_back(std::move(data));
+    sensor_buffer.last_timestamp =timestamp;
+    sensor_buffer.has_received_data =true;
+    sensor_buffer.last_received_time =Clock::now();
     sensor_buffer.active = true;
-
     cv_not_empty_.notify_one();
-
     return true;
 }
 

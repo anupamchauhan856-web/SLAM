@@ -15,11 +15,7 @@ DatasetPlayer::DatasetPlayer(
 {
 }
 
-
-// ============================================================
-// DESTRUCTOR
-// ============================================================
-
+//DESTRUCTOR STOPS THE PLAYER THREAD IF IT IS STILL RUNNING
 DatasetPlayer::~DatasetPlayer()
 {
     stop();
@@ -32,11 +28,8 @@ DatasetPlayer::~DatasetPlayer()
 
 bool DatasetPlayer::start()
 {
-    if (running_)
-        return false;
-
-    if (!source_)
-        return false;
+    if (running_) return false;
+    if (!source_) return false;
 
     running_ = true;
     finished_ = false;

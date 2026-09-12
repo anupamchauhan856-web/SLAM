@@ -1,229 +1,39 @@
 # SLAM (Simultaneous Localization and Mapping)
 
-Modular Visual, Visual-Inertial and Stereo SLAM framework in C++.
+A modular C++17 multi-sensor SLAM system with automated evaluation and failure analysis.
 
 ## System Specification
 
 - **Current visualizer:** Pangolin
 
 ## High-Level Architecture
-### Sensor Calibration
-                    ┌──────────────────────┐
-                    │    SensorManager     │
-                    │      TOP OWNER       │
-                    └──────────┬───────────┘
-                               │
-                ┌──────────────┴──────────────┐
-                │                             │
-              owns                          owns
-                │                             │
-                ▼                             ▼
-       ┌─────────────────┐          ┌─────────────────┐
-       │ SensorContext   │          │CalibrationManager│
-       │   per sensor    │          └─────────────────┘
-       └───────┬─────────┘
-               │
-          ┌────┴────┐
-          │         │
-        owns      owns
-          │         │
-          ▼         ▼
-    ┌──────────┐ ┌──────────────┐
-    │  Driver  │ │ICalibration  │
-    └──────────┘ └──────────────┘
-
-                         ┌─────────────────────────┐
-                         │     SENSOR CONFIG       │
-                         │       YAML / JSON       │
-                         └────────────┬────────────┘
-                                      │
-                                      ▼
-                         ┌─────────────────────────┐
-                         │     SensorManager       │
-                         │                         │
-                         │  • loadConfig()         │
-                         │  • sensor registration  │
-                         │  • calibration setup    │
-                         │  • owns SensorContexts  │
-                         │  • owns CalibrationMgr  │
-                         └───────────┬─────────────┘
-                                     │
-                   ┌─────────────────┴─────────────────┐
-                   │                                   │
-                   │ owns                              │ owns
-                   ▼                                   ▼
-        ┌─────────────────────────┐        ┌─────────────────────────┐
-        │     SensorContext       │        │   CalibrationManager    │
-        │       (per sensor)      │        │                         │
-        │                         │        │ • validates config      │
-        │ • sensor identity       │        │ • selects provider      │
-        │ • owns SensorDriver     │        │ • coordinates loading   │
-        │ • owns ICalibration     │        │ • coordinates algorithm │
-        └────────────┬────────────┘        └────────────┬────────────┘
-                     │                                  │
-                     │ owns                             │
-                     ▼                                  │
-        ┌─────────────────────────┐                     │
-        │      SensorDriver       │                     │
-        │                         │                     │
-        │ • init()                │                     │
-        │ • start()               │                     │
-        │ • stop()                │                     │
-        │ • lifecycle/state       │                     │
-        └────────────┬────────────┘                     │
-                     │                                  │
-                     │                                  │
-                     │                    CalibrationConfig
-                     │                                  │
-                     │                                  ▼
-                     │                    ┌─────────────────────────┐
-                     │                    │     Provider Selection  │
-                     │                    └────────────┬────────────┘
-                     │                                 │
-                     │                    ┌────────────┴────────────┐
-                     │                    │                         │
-                     │                    ▼                         ▼
-                     │          ┌────────────────────┐   ┌────────────────────────┐
-                     │          │ ICalibrationLoader │   │ ICalibrationAlgorithm  │
-                     │          │                    │   │                        │
-                     │          │ Load existing      │   │ Compute calibration     │
-                     │          │ calibration data   │   │ from observations/data │
-                     │          └──────────┬─────────┘   └───────────┬────────────┘
-                     │                     │                         │
-                     │                     ▼                         ▼
-                     │          ┌────────────────────┐   ┌────────────────────────┐
-                     │          │ EurocCalibration   │   │ Zhang / Stereo /       │
-                     │          │ Loader             │   │ Future Algorithms      │
-                     │          └──────────┬─────────┘   └───────────┬────────────┘
-                     │                     │                         │
-                     │                     └────────────┬────────────┘
-                     │                                  │
-                     │                                  ▼
-                     │                    ┌─────────────────────────┐
-                     │                    │      ICalibration       │
-                     │                    │                         │
-                     │                    │ Common calibration      │
-                     │                    │ interface               │
-                     │                    └────────────┬────────────┘
-                     │                                 │
-                     │                    ownership transferred to
-                     │                                 │
-                     └─────────────────────────────────┘
-                                                       │
-                                                       ▼
-                                      ┌─────────────────────────┐
-                                      │     SensorContext       │
-                                      │                         │
-                                      │ owns resulting          │
-                                      │ ICalibration             │
-                                      └─────────────────────────┘
-
-                                        ┌──────────────────────┐
-                                        │   Sensor YAML Config │
-                                        └──────────┬───────────┘
-                                                    │
-                                                    ▼
-                                        ┌──────────────────────┐
-                                        │    SensorManager     │
-                                        │                      │
-                                        │ Creates              │
-                                        │ CalibrationConfig    │
-                                        └──────────┬───────────┘
-                                                    │
-                                                    ▼
-                                        ┌──────────────────────┐
-                                        │ CalibrationManager   │
-                                        └──────────┬───────────┘
-                                                    │
-                                            provider type
-                                                    │
-                                            ┌────┴─────┐
-                                            ▼          ▼
-                                        ┌──────────┐ ┌───────────────┐
-                                        │  Loader  │ │   Algorithm   │
-                                        └────┬─────┘ └───────┬───────┘
-                                            │               │
-                                            └───────┬───────┘
-                                                    ▼
-                                            ┌────────────────┐
-                                            │ ICalibration   │
-                                            └───────┬────────┘
-                                                    │
-                                            std::unique_ptr
-                                                    │
-                                                    ▼
-                                            ┌────────────────┐
-                                            │SensorContext   │
-                                            │                │
-                                            │ owns           │
-                                            │ calibration   │
-                                            └────────────────┘
-
-### Sensor Drivers, Data Source, Dataset Player
-                         ┌──────────────────────┐
-                         │    SensorManager     │
-                         │                      │
-                         │ Owns SensorContexts  │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │    SensorContext     │
-                         │      cam0            │
-                         │                      │
-                         │ owns SensorDriver    │
-                         │ owns Calibration     │
-                         └──────────┬───────────┘
-                                    │
-                                    │ lifecycle
-                                    ▼
-                         ┌──────────────────────┐
-                         │  EurocDatasetDriver  │
-                         │                      │
-                         │ init()               │
-                         │ start()              │
-                         │ stop()               │
-                         │ state                │
-                         └──────────┬───────────┘
-                                    │
-                                    │ creates / owns
-                                    ▼
-                         ┌──────────────────────┐
-                         │    DatasetPlayer     │
-                         │                      │
-                         │ playback thread      │
-                         │ timing/rate          │
-                         │ asks source for data │
-                         └──────────┬───────────┘
-                                    │
-                                    │ reads from
-                                    ▼
-                         ┌──────────────────────┐
-                         │   IDataSource        │
-                         │                      │
-                         │ readNext(data)       │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │ EurocCameraSource    │
-                         │                      │
-                         │ CSV + image files    │
-                         └──────────┬───────────┘
-                                    │
-                                    │ SensorData
-                                    ▼
-                         ┌──────────────────────┐
-                         │    BufferManager     │
-                         │                      │
-                         │ cam0 deque           │
-                         │ cam1 deque           │
-                         │ imu0 deque            │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                              SLAM pipeline
-
+### Sensors: Calibration, Drivers, Dataset Player, Data source
+                         Config YAML
+                              │
+                              ▼
+                       SensorManager
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
+ SensorContext(s)       BufferManager       CalibrationManager
+        │                     ▲                     │
+        ▼                     │                     ▼
+ SensorDriver            DatasetPlayer       ICalibrationLoader
+        │                     ▲                     │
+        ▼                     │                     ▼
+EurocDatasetDriver       IDataSource       EurocCalibrationLoader
+                              │
+                         ┌────┴─────┐
+                         ▼           ▼
+                  EurocCameraSource  EurocImuSource
+                         │           │
+                         └────┬──────┘
+                              ▼
+                         BufferManager
+                              │
+                              ▼
+                          SLAM Core
 ## Status
 
 - ⚪ Not Started

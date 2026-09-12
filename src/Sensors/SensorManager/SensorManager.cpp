@@ -421,30 +421,30 @@ bool SensorManager::loadConfig(const std::string& config_path)
 
             PlaybackConfig playback_config;
 
-if (data_sources["playback"])
-{
-    if (data_sources["playback"]["realtime"])
-    {
-        playback_config.realtime =
-            data_sources["playback"]["realtime"].as<bool>();
-    }
+            if (data_sources["playback"])
+            {
+                if (data_sources["playback"]["realtime"])
+                {
+                    playback_config.realtime =
+                        data_sources["playback"]["realtime"].as<bool>();
+                }
 
-    if (data_sources["playback"]["rate"])
-    {
-        playback_config.rate =
-            data_sources["playback"]["rate"].as<double>();
-    }
-}
+                if (data_sources["playback"]["rate"])
+                {
+                    playback_config.rate =
+                        data_sources["playback"]["rate"].as<double>();
+                }
+            }
 
-auto driver_object =
-    std::make_unique<EurocDatasetDriver>(
-        dataset_path,
-        id,
-        type,
-        data_path,
-        csv,
-        buffer_manager_,
-        playback_config);
+            auto driver_object =
+                std::make_unique<EurocDatasetDriver>(
+                    dataset_path,
+                    id,
+                    type,
+                    data_path,
+                    csv,
+                    buffer_manager_,
+                    playback_config);
 
             // ========================================================
             // CREATE COMMON SENSOR CONTEXT

@@ -1,4 +1,4 @@
-#include "SensorManager/SensorManager.h"
+#include "Sensors/SensorManager/SensorManager.h"
 
 bool SensorManager::addSensor(std::unique_ptr<SensorContext> sensor)
 {
@@ -9,7 +9,7 @@ bool SensorManager::addSensor(std::unique_ptr<SensorContext> sensor)
     if (sensors_.find(name) != sensors_.end()) return false;
 
     //Create a buffer for this sensor in the buffer manager
-    if (!buffer_manager_.registerSensor(name)) return false;
+    if (!buffer_manager_.registerSensor(name, 1000, 0)) return false;
     sensors_.emplace(name,std::move(sensor));
     return true;
 }
@@ -419,16 +419,32 @@ bool SensorManager::loadConfig(const std::string& config_path)
             // CREATE EUROC DATASET DRIVER
             // ========================================================
 
-            auto driver_object =
-                std::make_unique<EurocDatasetDriver>(
-                    dataset_path,
-                    id,
-                    type,
-                    stream,
-                    data_path,
-                    csv,
-                    buffer_manager_);
+            PlaybackConfig playback_config;
 
+if (data_sources["playback"])
+{
+    if (data_sources["playback"]["realtime"])
+    {
+        playback_config.realtime =
+            data_sources["playback"]["realtime"].as<bool>();
+    }
+
+    if (data_sources["playback"]["rate"])
+    {
+        playback_config.rate =
+            data_sources["playback"]["rate"].as<double>();
+    }
+}
+
+auto driver_object =
+    std::make_unique<EurocDatasetDriver>(
+        dataset_path,
+        id,
+        type,
+        data_path,
+        csv,
+        buffer_manager_,
+        playback_config);
 
             // ========================================================
             // CREATE COMMON SENSOR CONTEXT

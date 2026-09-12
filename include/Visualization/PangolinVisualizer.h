@@ -7,6 +7,7 @@
 #include <atomic>
 #include <mutex>
 #include <vector>
+#include <Eigen/Core>
 
 class PangolinVisualizer : public Visualizer
 {

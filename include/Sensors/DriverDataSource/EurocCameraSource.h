@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "Sensors/Drivers/DriverDataSource/IDataSource.h"
-#include "SensorDriverDataStructs/CameraEntry.h"
+#include "Sensors/DriverDataSource/IDataSource.h"
+#include "Sensors/DriverRawDataStruct/CameraEntry.h"
 
 class EurocCameraSource : public IDataSource
 {

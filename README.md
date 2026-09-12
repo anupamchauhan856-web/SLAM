@@ -159,6 +159,71 @@ Modular Visual, Visual-Inertial and Stereo SLAM framework in C++.
                                             │ calibration   │
                                             └────────────────┘
 
+### Sensor Drivers, Data Source, Dataset Player
+                         ┌──────────────────────┐
+                         │    SensorManager     │
+                         │                      │
+                         │ Owns SensorContexts  │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │    SensorContext     │
+                         │      cam0            │
+                         │                      │
+                         │ owns SensorDriver    │
+                         │ owns Calibration     │
+                         └──────────┬───────────┘
+                                    │
+                                    │ lifecycle
+                                    ▼
+                         ┌──────────────────────┐
+                         │  EurocDatasetDriver  │
+                         │                      │
+                         │ init()               │
+                         │ start()              │
+                         │ stop()               │
+                         │ state                │
+                         └──────────┬───────────┘
+                                    │
+                                    │ creates / owns
+                                    ▼
+                         ┌──────────────────────┐
+                         │    DatasetPlayer     │
+                         │                      │
+                         │ playback thread      │
+                         │ timing/rate          │
+                         │ asks source for data │
+                         └──────────┬───────────┘
+                                    │
+                                    │ reads from
+                                    ▼
+                         ┌──────────────────────┐
+                         │   IDataSource        │
+                         │                      │
+                         │ readNext(data)       │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ EurocCameraSource    │
+                         │                      │
+                         │ CSV + image files    │
+                         └──────────┬───────────┘
+                                    │
+                                    │ SensorData
+                                    ▼
+                         ┌──────────────────────┐
+                         │    BufferManager     │
+                         │                      │
+                         │ cam0 deque           │
+                         │ cam1 deque           │
+                         │ imu0 deque            │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                              SLAM pipeline
+
 ## Status
 
 - ⚪ Not Started

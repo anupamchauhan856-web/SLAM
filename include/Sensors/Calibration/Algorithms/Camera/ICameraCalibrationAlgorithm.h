@@ -6,5 +6,7 @@ class ICameraCalibrationAlgorithm :public ICalibrationAlgorithm
 {
 public:
     virtual ~ICameraCalibrationAlgorithm() = default;
-    virtual bool calibrate() = 0;
+
+    virtual std::unique_ptr<ICalibration>
+    calibrate(const CalibrationData& data) override = 0;
 };

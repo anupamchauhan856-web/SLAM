@@ -8,6 +8,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(Pangolin CONFIG REQUIRED
+    PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../Pangolin/build
+)
 
 add_library(slam_core INTERFACE)
 
@@ -18,22 +22,50 @@ target_include_directories(slam_core INTERFACE
 
 target_link_libraries(slam_core INTERFACE
     ${OpenCV_LIBS}
+    Eigen3::Eigen
 )
 
 # Application
 add_executable(slam_app
     src/main.cpp
-    src/SensorManager/SensorManager.cpp
-    src/SensorManager/SensorContext.cpp
-    src/BufferManager/BufferManager.cpp
-    src/SensorDrivers/EurocDatasetDriver.cpp
+    # Sensors
+    src/Sensors/Buffers/BufferManager.cpp
+
+    # Calibration
+    src/Sensors/Calibration/Loaders/EurocCalibrationLoader.cpp
+    src/Sensors/Calibration/Manager/CalibrationManager.cpp
+
+    # Dataset playback
+    src/Sensors/DatasetPlayer/DatasetPlayer.cpp
+
+    # Dataset sources
+    src/Sensors/DriverDataSource/EurocCameraSource.cpp
+    src/Sensors/DriverDataSource/EurocImuSource.cpp
+
+    # Drivers
+    src/Sensors/Drivers/EurocDatasetDriver.cpp
+
+    # Sensor context / manager
+    src/Sensors/SensorContext/SensorContext.cpp
+    src/Sensors/SensorManager/SensorManager.cpp
+
+    # Feature detection
+    src/FeatureDetectionDescription/ORBDetectorDescriptor.cpp
+
+    # Visualization
+    src/Visualization/PangolinVIsualizer.cpp
 )
 
 target_include_directories(slam_app PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Pangolin/components/pango_core/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Pangolin/components/pango_display/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Pangolin/components/pango_plot/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../Pangolin/components/pango_video/include
 )
 
 target_link_libraries(slam_app PRIVATE
     slam_core
     yaml-cpp
+    pango_display
 )

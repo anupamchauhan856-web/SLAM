@@ -6,5 +6,7 @@ class IImuCalibrationAlgorithm : public ICalibrationAlgorithm
 {
 public:
     virtual ~IImuCalibrationAlgorithm() = default;
-    virtual bool calibrate() = 0;
+
+    virtual std::unique_ptr<ICalibration>
+    calibrate(const CalibrationData& data) override = 0;
 };

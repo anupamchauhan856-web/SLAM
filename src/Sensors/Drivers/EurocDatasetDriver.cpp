@@ -1,9 +1,7 @@
 #include "Sensors/Drivers/EurocDatasetDriver.h"
 
-#include "Sensors/Drivers/DataSources/EurocCameraSource.h"
-#include "Sensors/Drivers/DataSources/EurocImuSource.h"
-
 #include <filesystem>
+#include <utility>
 
 EurocDatasetDriver::EurocDatasetDriver(
     const std::string& dataset_path,
@@ -83,7 +81,8 @@ bool EurocDatasetDriver::init()
         std::make_unique<DatasetPlayer>(
             std::move(source_),
             buffer_manager_,
-            playback_config_);
+            playback_config_,
+            sensor_id_);
 
     state_ = DriverState::Ready;
 
@@ -151,11 +150,6 @@ bool EurocDatasetDriver::stop()
 bool EurocDatasetDriver::isRunning() const
 {
     return state_ == DriverState::Running;
-}
-
-DriverState EurocDatasetDriver::getState() const
-{
-    return state_.load();
 }
 
 DriverState EurocDatasetDriver::getState() const

@@ -7,8 +7,10 @@
 #include "SensorDriver.h"
 
 #include "Sensors/Buffers/BufferManager.h"
-#include "Sensors/Drivers/Players/DatasetPlayer.h"
-#include "Sensors/Drivers/Players/PlaybackConfig.h"
+#include "Sensors/DatasetPlayer/DatasetPlayer.h"
+#include "Sensors/DatasetPlayer/PlaybackConfig.h"
+#include "Sensors/DriverDataSource/EurocCameraSource.h"
+#include "Sensors/DriverDataSource/EurocImuSource.h"
 
 class EurocDatasetDriver : public SensorDriver
 {

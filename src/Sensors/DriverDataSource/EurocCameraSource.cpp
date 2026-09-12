@@ -1,4 +1,4 @@
-#include "Sensors/Drivers/DataSources/EurocCameraSource.h"
+#include "Sensors/DriverDataSource/EurocCameraSource.h"
 
 #include <fstream>
 #include <sstream>

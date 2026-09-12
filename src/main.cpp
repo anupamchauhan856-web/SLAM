@@ -4,7 +4,7 @@
 #include <thread>
 #include <chrono>
 
-#include"SensorManager/SensorManager.h"
+#include"Sensors/SensorManager/SensorManager.h"
 
 int main(){
     //SENSOR MANAGER: INIT AND START

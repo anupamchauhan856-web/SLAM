@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "Sensors/Drivers/DataSources/IDataSource.h"
-#include "SensorDriverDataStructs/ImuEntry.h"
+#include "Sensors/DriverDataSource/IDataSource.h"
+#include "Sensors/DriverRawDataStruct/ImuEntry.h"
 
 class EurocImuSource : public IDataSource
 {

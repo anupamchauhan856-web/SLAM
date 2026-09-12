@@ -4,6 +4,7 @@
 #include "Visualization/Visualizer.h"
 
 class Frontend;
+class Backend;
 
 class SLAMSystem{
 public:
@@ -18,4 +19,5 @@ protected:
     std::unique_ptr<SensorManager> sensor_manager_;
     std::unique_ptr<Visualizer> visualizer_;
     std::unique_ptr<Frontend> frontend_;
+    std::unique_ptr<Backend> backend_;
 };

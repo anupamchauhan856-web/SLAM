@@ -7,7 +7,10 @@ A modular C++17 multi-sensor SLAM system with automated evaluation and failure a
 - **Current visualizer:** Pangolin
 
 ## High-Level Architecture
-### Sensors: Calibration, Drivers, Dataset Player, Data source
+
+### Sensors: Calibration, Drivers, Dataset Player, Data Source
+
+```text
                          Config YAML
                               │
                               ▼
@@ -19,21 +22,23 @@ A modular C++17 multi-sensor SLAM system with automated evaluation and failure a
  SensorContext(s)       BufferManager       CalibrationManager
         │                     ▲                     │
         ▼                     │                     ▼
- SensorDriver            DatasetPlayer       ICalibrationLoader
+  SensorDriver         DatasetPlayer       ICalibrationLoader
         │                     ▲                     │
         ▼                     │                     ▼
-EurocDatasetDriver       IDataSource       EurocCalibrationLoader
+EurocDatasetDriver      IDataSource       EurocCalibrationLoader
                               │
-                         ┌────┴─────┐
-                         ▼           ▼
-                  EurocCameraSource  EurocImuSource
-                         │           │
-                         └────┬──────┘
+                        ┌─────┴─────┐
+                        ▼           ▼
+                EurocCameraSource  EurocImuSource
+                        │           │
+                        └─────┬─────┘
                               ▼
-                         BufferManager
+                        BufferManager
                               │
                               ▼
                           SLAM Core
+```
+
 ## Status
 
 - ⚪ Not Started

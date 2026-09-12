@@ -23,6 +23,12 @@ A modular C++17 multi-sensor SLAM system with automated evaluation and failure a
 - ⚪ Visual-Inertial SLAM
 - ⚪ Stereo SLAM
 
+| System | Sensors | Primary Estimator | Prediction | Backend |
+|---|---|---|---|---|
+| **Monocular SLAM** | 1× Camera | EKF | Constant Velocity | Local + Global Optimization |
+| **Monocular VI-SLAM** | 1× Camera + IMU | Sliding-Window Optimization | IMU Propagation / Preintegration | Global Optimization |
+| **Stereo VI-SLAM** | Stereo Camera + IMU | Sliding-Window Optimization | IMU Propagation / Preintegration | Global Optimization |
+
 ## Architecture Layers
 
 - 🟢 **Configuration** — YAML-based system and sensor configuration

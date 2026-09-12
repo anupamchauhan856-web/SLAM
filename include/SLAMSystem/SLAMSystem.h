@@ -3,9 +3,9 @@
 #include"SensorManager/SensorManager.h"
 #include "Visualization/Visualizer.h"
 
-class SLAMSystemBase{
+class SLAMSystem{
 public:
-    virtual ~SLAMSystemBase() = default;
+    virtual ~SLAMSystem() = default;
 
     //OVERRIDEN METHODS BY DERIVED CLASSES
     virtual void init() = 0; //configure SLAM

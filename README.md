@@ -20,8 +20,8 @@ A modular C++17 multi-sensor SLAM system with automated evaluation and failure a
 ## Target Systems
 
 - 🟡 Monocular SLAM
-- ⚪ Visual-Inertial SLAM
-- ⚪ Stereo SLAM
+- ⚪ Monocular VI-SLAM
+- ⚪ Stereo VI-SLAM
 
 | System | Sensors | Primary Estimator | Prediction | Backend |
 |---|---|---|---|---|
@@ -69,6 +69,38 @@ A modular C++17 multi-sensor SLAM system with automated evaluation and failure a
 - ⚪ Local optimization
 
 ## High-Level Architecture
+
+### SLAM Core Architecture
+
+```text
+                              SLAM
+                               │
+        ┌──────────────┬───────┼────────┬──────────────┐
+        ▼              ▼       ▼        ▼              ▼
+ Sensor Manager    Frontend  Estimator Backend    Loop Closure
+        │              │       │        │              │
+        │              │       │        ├── Local       │
+        │              │       │        └── Global      │
+        │              │       │                       │
+        │              │       │                       ▼
+        │              │       │                Loop Constraints
+        │              │       │
+        │              │       ├── Predictor
+        │              │       │    └── Motion Model
+        │              │       │
+        │              │       ├── Corrector
+        │              │       │    └── Measurement Model
+        │              │       │
+        │              │       └── State / Uncertainty
+        │              │
+        │              ├── Camera Frontend
+        │              ├── IMU Frontend
+        │              └── LiDAR Frontend
+        │
+        └──────────────────────────────┐
+                                       ▼
+                                  Map Manager
+```
 
 ### Sensors: Calibration, Drivers, Dataset Player, Data Source
 

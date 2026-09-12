@@ -3,6 +3,8 @@
 #include"SensorManager/SensorManager.h"
 #include "Visualization/Visualizer.h"
 
+class Frontend;
+
 class SLAMSystem{
 public:
     virtual ~SLAMSystem() = default;
@@ -15,4 +17,5 @@ public:
 protected:
     std::unique_ptr<SensorManager> sensor_manager_;
     std::unique_ptr<Visualizer> visualizer_;
+    std::unique_ptr<Frontend> frontend_;
 };

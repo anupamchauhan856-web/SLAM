@@ -1,0 +1,41 @@
+#pragma once
+
+#include <cstddef>
+#include <string>
+#include <vector>
+
+#include "Sensors/Drivers/DriverDataSource/IDataSource.h"
+#include "SensorDriverDataStructs/CameraEntry.h"
+
+class EurocCameraSource : public IDataSource
+{
+public:
+
+    EurocCameraSource(
+        const std::string& dataset_path,
+        const std::string& sensor_id,
+        const std::string& data_path,
+        const std::string& csv);
+
+    bool init() override;
+
+    bool readNext(
+        BufferManager::Data& data) override;
+
+    bool isFinished() const override;
+
+private:
+
+    bool loadCsv();
+
+private:
+
+    std::string dataset_path_;
+    std::string sensor_id_;
+    std::string data_path_;
+    std::string csv_;
+
+    std::vector<CameraEntry> entries_;
+
+    std::size_t current_index_ = 0;
+};

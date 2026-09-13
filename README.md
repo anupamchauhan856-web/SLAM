@@ -75,15 +75,19 @@ A modular C++17 multi-sensor SLAM system with automated evaluation and failure a
 ```text
                               SLAM
                                │
-        ┌──────────────┬───────┼────────┬──────────────┐
-        ▼              ▼       ▼        ▼              ▼
- Sensor Manager    Frontend  Estimator Backend    Loop Closure
+        ┌──────────────┬───────┼────────┬──────────────┬─────────────┐
+        ▼              ▼       ▼        ▼              ▼             ▼
+ Sensor Manager    Frontend  Estimator Backend    Loop Closure   Visualizer
         │              │       │        │              │
-        │              │       │        ├── Local       │
-        │              │       │        └── Global      │
+        │              │       │        ├── Local      │
+        │              │       │        ├── Global     │
+        │              │       │        │              │
+        │              │       │        ├── Ceres      │
+        │              │       │        ├── GTSAM      │
+        │              │       │        └── g2o        │
         │              │       │                       │
         │              │       │                       ▼
-        │              │       │                Loop Constraints
+        │              │       │                 Loop Constraints
         │              │       │
         │              │       ├── Predictor
         │              │       │    └── Motion Model
@@ -132,7 +136,42 @@ EurocDatasetDriver       IDataSource       EurocCalibrationLoader
                               ▼
                           SLAM Core
 ```
+### Estimator Architecture
 
+```text
+                              Estimator
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                    ▼                           ▼
+              FilterEstimator          OptimizationEstimator
+                    │                           │
+          ┌─────────┼─────────┐       ┌─────────┼──────────────┐
+          │         │         │       │         │              │
+          ▼         ▼         ▼       ▼         ▼              ▼
+     FilterState Predictor Corrector  State  SlidingWindow  Optimizer
+          │         │         │                 │              │
+          │         │         │                 │              ▼
+          │         │         │                 │       Nonlinear Solver
+          │         │         │                 │
+          │         │         │                 ├── Visual Residuals
+          │         │         │                 └── IMU Residuals
+          │         │         │
+          │         │         └── Measurement Update
+          │         │
+          │         └── Motion / IMU Propagation
+          │
+          └── Estimated State
+
+                    FilterEstimator
+                          │
+                          └── Covariance / Uncertainty
+
+              OptimizationEstimator
+                          │
+                          └── Marginalization
+                               └── Schur Complement
+```
 ### Monocular Visual Frontend Pipeline
 
 ```text

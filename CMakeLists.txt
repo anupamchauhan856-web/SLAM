@@ -50,7 +50,7 @@ add_executable(slam_app
     src/Sensors/SensorManager/SensorManager.cpp
 
     # Feature detection
-    src/FeatureDetectionDescription/ORBDetectorDescriptor.cpp
+    
 
     # Visualization
     src/Visualization/PangolinVIsualizer.cpp
